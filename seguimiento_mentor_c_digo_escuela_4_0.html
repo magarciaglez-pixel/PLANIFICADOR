@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Mentoría - Código Escuela 4.0</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .card-shadow { box-shadow: none !important; border: 1px solid #ddd !important; }
+            .page-break { page-break-before: always; }
+        }
+        .print-only { display: none; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .calendar-day-hover:hover {
+            border-color: #38bdf8;
+            background-color: #f0f9ff;
+        }
+    </style>
+</head>
+<body class="h-full font-sans antialiased text-slate-800 bg-slate-50 flex flex-col min-h-screen">
+
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand / Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-cyan-500 to-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-cyan-500/30">
+                        <i class="fa-solid fa-code-branch text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg leading-tight tracking-tight block">Código Escuela 4.0</span>
+                        <span class="text-xs text-cyan-400 font-medium">Cuaderno Digital del Mentor LOMLOE</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs Desktop -->
+                <nav class="hidden md:flex space-x-1 lg:space-x-2">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 bg-slate-800 text-white">
+                        <i class="fa-solid fa-chart-pie text-cyan-400"></i>
+                        <span>Panel General</span>
+                    </button>
+                    <button onclick="switchTab('visitas')" id="nav-visitas" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-calendar-days text-emerald-400"></i>
+                        <span>Planning Mensual</span>
+                    </button>
+                    <button onclick="switchTab('centros')" id="nav-centros" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-school text-amber-400"></i>
+                        <span>Mis Centros</span>
+                    </button>
+                    <button onclick="switchTab('retos')" id="nav-retos" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-lightbulb text-purple-400"></i>
+                        <span>Diseñador Retos</span>
+                    </button>
+                    <button onclick="switchTab('ajustes')" id="nav-ajustes" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-gear text-slate-400"></i>
+                        <span>Ajustes & Datos</span>
+                    </button>
+                </nav>
+
+                <!-- Actions -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="openVisitModal()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3.5 py-2 rounded-lg font-semibold text-sm shadow-md transition flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Nueva Visita</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Mobile Bar -->
+        <div class="md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur px-2 py-1.5 flex justify-around text-center">
+            <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="p-2 text-xs text-cyan-400 font-medium">
+                <i class="fa-solid fa-chart-pie text-base block mb-0.5"></i>Panel
+            </button>
+            <button onclick="switchTab('visitas')" id="mob-nav-visitas" class="p-2 text-xs text-slate-400 font-medium">
+                <i class="fa-solid fa-calendar-days text-base block mb-0.5"></i>Planning
+            </button>
+            <button onclick="switchTab('centros')" id="mob-nav-centros" class="p-2 text-xs text-slate-400 font-medium">
+                <i class="fa-solid fa-school text-base block mb-0.5"></i>Centros
+            </button>
+            <button onclick="switchTab('retos')" id="mob-nav-retos" class="p-2 text-xs text-slate-400 font-medium">
+                <i class="fa-solid fa-lightbulb text-base block mb-0.5"></i>Retos
+            </button>
+            <button onclick="switchTab('ajustes')" id="mob-nav-ajustes" class="p-2 text-xs text-slate-400 font-medium">
+                <i class="fa-solid fa-gear text-base block mb-0.5"></i>Ajustes
+            </button>
+        </div>
+    </header>
+
+    <!-- PRINT HEADER ONLY -->
+    <div class="print-only p-6 border-b border-slate-300 mb-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Programa Código Escuela 4.0 - Planificación Mensual</h1>
+                <p class="text-sm text-slate-600" id="print-month-title">Informe de Asesoramiento y Mentoría</p>
+            </div>
+            <div class="text-right text-xs text-slate-500">
+                <p>Documento de Justificación Pedagógica</p>
+                <p>Generado el: <span id="print-date"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-content space-y-6">
+            <!-- Banner / Greeting -->
+            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                <div class="absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none p-6 flex items-center">
+                    <i class="fa-solid fa-brain text-9xl"></i>
+                </div>
+                <div class="relative z-10 max-w-2xl">
+                    <span class="inline-block px-3 py-1 bg-cyan-500/20 text-cyan-300 text-xs font-semibold rounded-full mb-3 border border-cyan-500/30">
+                        Programa Código Escuela 4.0
+                    </span>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Gestión del Acompañamiento y Mentoría</h1>
+                    <p class="mt-2 text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Sistema de seguimiento para transformar aulas en espacios de resolución de problemas mediante Pensamiento Computacional, Robótica y Actividades Desconectadas LOMLOE.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Visitas Totales</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="stat-total-visitas">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-school"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Centros Miembros</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="stat-total-centros">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Docentes Atendidos</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="stat-total-docentes">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Horas de Mentoría</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="stat-total-horas">0h</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Column Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Recent Visits List -->
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-history text-cyan-600"></i>
+                            <h2 class="text-lg font-bold text-slate-800">Últimas Visitas Realizadas</h2>
+                        </div>
+                        <button onclick="switchTab('visitas')" class="text-xs text-cyan-600 font-semibold hover:underline flex items-center space-x-1">
+                            <span>Ver planning completo</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <div id="dash-recent-visitas" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Modality Summary & Quick Actions -->
+                <div class="space-y-6">
+                    <!-- Modalities Breakdown -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center space-x-2">
+                            <i class="fa-solid fa-layer-group text-purple-600"></i>
+                            <span>Modalidades Utilizadas</span>
+                        </h2>
+                        <div class="space-y-3" id="dash-modalities-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Card -->
+                    <div class="bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-100 rounded-2xl p-5 space-y-3">
+                        <h3 class="font-bold text-cyan-900 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-cyan-600"></i>
+                            <span>Diseña un Reto de Aula</span>
+                        </h3>
+                        <p class="text-xs text-cyan-800 leading-relaxed">
+                            Crea una propuesta pedagógica combinando actividades Desconectadas, Conectadas o Robótica adaptada a la LOMLOE.
+                        </p>
+                        <button onclick="switchTab('retos')" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <span>Crear Nuevo Reto</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISITAS & PLANNING MENSUAL TAB -->
+        <div id="tab-visitas" class="tab-content hidden space-y-6">
+            <!-- Header bar with search & filter -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm no-print">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <i class="fa-solid fa-calendar-days text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Planning y Programación Mensual</h2>
+                        <p class="text-xs text-slate-500">Gestión de calendario, agenda mensual y hoja de ruta de mentorías.</p>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="filter-visita-centro" onchange="renderCalendar(); renderMonthlyPlanning(); renderVisitasList();" class="text-xs bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                        <option value="0">Todos los centros</option>
+                        <!-- Populated by JS -->
+                    </select>
+                    
+                    <button onclick="printMonthlyPlan()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-solid fa-print"></i>
+                        <span class="hidden sm:inline">Imprimir Plan Mensual</span>
+                    </button>
+
+                    <button onclick="openVisitModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nueva Visita</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Month Stats KPI Cards (Current Active Month) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
+                <div class="bg-emerald-50/70 border border-emerald-100 p-4 rounded-2xl space-y-1">
+                    <span class="text-[11px] font-semibold uppercase text-emerald-700 tracking-wider block">Visitas en el Mes</span>
+                    <div class="flex items-baseline space-x-2">
+                        <span class="text-2xl font-bold text-emerald-900" id="month-stat-visitas">0</span>
+                        <span class="text-xs text-emerald-700 font-medium">sesiones</span>
+                    </div>
+                </div>
+                <div class="bg-blue-50/70 border border-blue-100 p-4 rounded-2xl space-y-1">
+                    <span class="text-[11px] font-semibold uppercase text-blue-700 tracking-wider block">Horas de Mentoría</span>
+                    <div class="flex items-baseline space-x-2">
+                        <span class="text-2xl font-bold text-blue-900" id="month-stat-horas">0h</span>
+                        <span class="text-xs text-blue-700 font-medium">acumuladas</span>
+                    </div>
+                </div>
+                <div class="bg-amber-50/70 border border-amber-100 p-4 rounded-2xl space-y-1">
+                    <span class="text-[11px] font-semibold uppercase text-amber-700 tracking-wider block">Centros Intervenidos</span>
+                    <div class="flex items-baseline space-x-2">
+                        <span class="text-2xl font-bold text-amber-900" id="month-stat-centros">0</span>
+                        <span class="text-xs text-amber-700 font-medium">colegios/IES</span>
+                    </div>
+                </div>
+                <div class="bg-purple-50/70 border border-purple-100 p-4 rounded-2xl space-y-1">
+                    <span class="text-[11px] font-semibold uppercase text-purple-700 tracking-wider block">Docentes Formados</span>
+                    <div class="flex items-baseline space-x-2">
+                        <span class="text-2xl font-bold text-purple-900" id="month-stat-docentes">0</span>
+                        <span class="text-xs text-purple-700 font-medium">profesores</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar Container -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 sm:p-6 space-y-4 no-print">
+                <!-- Month Navigator -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition" title="Mes Anterior">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <h3 id="calendar-month-year" class="text-lg font-bold text-slate-800 min-w-[170px] text-center">Enero 2026</h3>
+                        <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition" title="Mes Siguiente">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <button onclick="goToday()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg transition">
+                        Hoy
+                    </button>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="grid grid-cols-7 gap-1 text-center font-semibold text-xs text-slate-500 border-b border-slate-100 pb-2">
+                    <div>Lun</div>
+                    <div>Mar</div>
+                    <div>Mié</div>
+                    <div>Jue</div>
+                    <div>Vie</div>
+                    <div class="text-slate-400">Sáb</div>
+                    <div class="text-slate-400">Dom</div>
+                </div>
+
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- MONTHLY AGENDA / CRONOGRAMA MENSUAL DETALLADO -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4 card-shadow">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-list-ol text-cyan-600 text-lg"></i>
+                        <h3 class="font-bold text-slate-800 text-base" id="monthly-agenda-title">Agenda y Cronograma del Mes</h3>
+                    </div>
+                    <span class="text-xs bg-cyan-50 text-cyan-700 font-semibold px-3 py-1 rounded-full border border-cyan-200" id="monthly-agenda-badge">0 visitas programadas</span>
+                </div>
+
+                <div id="monthly-planning-container" class="space-y-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Full List of Visits -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4 no-print">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-slate-500"></i>
+                        <span>Historial General de Visitas</span>
+                    </h3>
+                    <div class="relative w-48 sm:w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="search-visita-input" oninput="renderVisitasList()" placeholder="Buscar temas, centros..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Fecha</th>
+                                <th class="p-3">Centro</th>
+                                <th class="p-3">Modalidad</th>
+                                <th class="p-3">Horas / Docentes</th>
+                                <th class="p-3">Planificación / Reto</th>
+                                <th class="p-3 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visitas-table-body" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTROS TAB -->
+        <div id="tab-centros" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2.5 bg-amber-100 text-amber-600 rounded-xl">
+                        <i class="fa-solid fa-school text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Gestión de Mis Centros Educativos</h2>
+                        <p class="text-xs text-slate-500">Añade nuevos colegios a tu lista o elimina aquellos que ya no formen parte de tu cupo.</p>
+                    </div>
+                </div>
+
+                <button onclick="openCentroModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Añadir Nuevo Centro</span>
+                </button>
+            </div>
+
+            <!-- Centros Grid / Cards -->
+            <div id="centros-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- RETOS TAB -->
+        <div id="tab-retos" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+                <div class="flex items-center space-x-3 border-b border-slate-100 pb-4">
+                    <div class="p-2.5 bg-purple-100 text-purple-600 rounded-xl">
+                        <i class="fa-solid fa-lightbulb text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Diseñador de Retos LOMLOE & Pensamiento Computacional</h2>
+                        <p class="text-xs text-slate-500">Genera dinámicamente propuestas de aula con la trifecta metodológica (Desconectada + Conectada + Robótica).</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Formulario de Configuración de Reto -->
+                    <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h3 class="font-bold text-slate-800 text-sm">Configurar Nuevo Reto</h3>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre del Reto / Título</label>
+                            <input type="text" id="reto-titulo" placeholder="Ej: Exploración Espacial con Micro:bit" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Etapa Educativa</label>
+                            <select id="reto-etapa" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                                <option>Infantil (3-6 años)</option>
+                                <option selected>1º-3º Primaria</option>
+                                <option>4º-6º Primaria</option>
+                                <option>Secundaria (ESO)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Materia / Área Principal</label>
+                            <input type="text" id="reto-materia" value="Matemáticas / Conocimiento del Medio" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Soporte Hardware / Robot</label>
+                            <select id="reto-hardware" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                                <option>Ninguno (Desconectado total)</option>
+                                <option>Bee-Bot / Blue-Bot</option>
+                                <option selected>BBC Micro:bit</option>
+                                <option>LEGO Education Spike Prime / Essential</option>
+                                <option>Makey Makey / Arduino</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Objetivo Pedagógico LOMLOE</label>
+                            <textarea id="reto-objetivo" rows="3" placeholder="Desarrollo de pensamiento algorítmico, bucles y condicionales aplicados..." class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea>
+                        </div>
+
+                        <button onclick="generateRetoTemplate()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Generar Propuesta de Aula</span>
+                        </button>
+                    </div>
+
+                    <!-- Vista Previa de la Ficha Didáctica -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 text-sm">Ficha de la Actividad</h3>
+                            <button onclick="copyRetoToClipboard()" class="text-xs text-purple-600 hover:text-purple-800 font-semibold flex items-center space-x-1 bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-200">
+                                <i class="fa-solid fa-copy"></i>
+                                <span>Copiar Ficha</span>
+                            </button>
+                        </div>
+
+                        <div id="reto-preview-card" class="bg-white border border-slate-200 rounded-xl p-5 space-y-4 shadow-inner text-xs sm:text-sm leading-relaxed">
+                            <p class="text-slate-400 italic text-center py-8">Configura los parámetros a la izquierda y pulsa "Generar Propuesta de Aula" para previsualizar el reto pedagógico.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AJUSTES TAB -->
+        <div id="tab-ajustes" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+                <div class="flex items-center space-x-3 border-b border-slate-100 pb-4">
+                    <div class="p-2.5 bg-slate-100 text-slate-600 rounded-xl">
+                        <i class="fa-solid fa-gear text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Ajustes & Copia de Seguridad</h2>
+                        <p class="text-xs text-slate-500">Tus datos se guardan de manera segura en tu navegador (`localStorage`). Puedes exportar un respaldo para GitHub o transferir información.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Export / Import Card -->
+                    <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-database text-cyan-600"></i>
+                            <span>Respaldo de Datos (JSON)</span>
+                        </h3>
+                        <p class="text-xs text-slate-600">
+                            Descarga una copia de seguridad en formato `.json` con todos tus centros, visitas y retos registrados.
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <button onclick="exportDataJSON()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold text-xs py-2 px-3.5 rounded-lg transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Exportar Respaldo</span>
+                            </button>
+                            <label class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs py-2 px-3.5 rounded-lg transition cursor-pointer flex items-center space-x-1.5">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>Importar Archivo</span>
+                                <input type="file" id="import-file-input" onchange="importDataJSON(event)" accept=".json" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Reset to Demo Data -->
+                    <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-rotate-left text-amber-600"></i>
+                            <span>Restablecer Datos Demo</span>
+                        </h3>
+                        <p class="text-xs text-slate-600">
+                            Reinicia la aplicación con los centros y visitas de demostración iniciales (⚠️ Borrará tus datos actuales no guardados).
+                        </p>
+                        <div class="pt-2">
+                            <button onclick="restoreDemoData()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs py-2 px-3.5 rounded-lg transition flex items-center space-x-1.5">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                                <span>Cargar Ejemplo Demo</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+    <!-- MODAL NUEVA / EDITAR VISITA -->
+    <div id="modal-visita" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-base flex items-center space-x-2" id="modal-visita-title">
+                    <i class="fa-solid fa-calendar-plus text-emerald-400"></i>
+                    <span>Registrar Visita de Asesoramiento</span>
+                </h3>
+                <button onclick="closeVisitModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="form-visita" onsubmit="saveVisit(event)" class="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm custom-scrollbar">
+                <input type="hidden" id="visita-id">
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Fecha de la Visita *</label>
+                    <input type="date" id="visita-fecha" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Centro Educativo *</label>
+                    <select id="visita-centro-id" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Horas Asesoramiento</label>
+                        <input type="number" step="0.5" min="0.5" value="2" id="visita-horas" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Docentes Atendidos</label>
+                        <input type="number" min="1" value="3" id="visita-docentes" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Modalidad de la Sesión *</label>
+                    <select id="visita-modalidad" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="Conectada (Scratch, MakeCode)">Conectada (Scratch, MakeCode, Python)</option>
+                        <option value="Desconectada (Lógica / Juegos)">Desconectada (Unplugged / Lógica / Tableros)</option>
+                        <option value="Robótica / Hardware (Micro:bit, Spike)">Robótica / Hardware (Micro:bit, Spike, mBot)</option>
+                        <option value="Asesoramiento LOMLOE / TDE">Asesoramiento LOMLOE / Programación Aula</option>
+                        <option value="Formación de Profesorado">Formación / Taller de Claustro</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Planificación / Contenido del Reto *</label>
+                    <textarea id="visita-plan" rows="3" required placeholder="Describe qué actividades se han desarrollado con el alumnado o profesorado..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Objetivo / Competencia LOMLOE</label>
+                    <input type="text" id="visita-lomloe" placeholder="Ej: STEM3 - Pensamiento Computacional y Algoritmos" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Observaciones / Próximos pasos</label>
+                    <input type="text" id="visita-obs" placeholder="Ej: Dejar kits de robótica prestados hasta la siguiente visita" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
+                    <button type="button" onclick="closeVisitModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-md transition">
+                        Guardar Visita
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO / EDITAR CENTRO -->
+    <div id="modal-centro" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 flex flex-col">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-bold text-base flex items-center space-x-2" id="modal-centro-title">
+                    <i class="fa-solid fa-school text-amber-400"></i>
+                    <span>Datos del Centro Educativo</span>
+                </h3>
+                <button onclick="closeCentroModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="form-centro" onsubmit="saveCentro(event)" class="p-6 space-y-4 text-xs sm:text-sm">
+                <input type="hidden" id="centro-id">
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nombre del Centro *</label>
+                    <input type="text" id="centro-nombre" required placeholder="Ej: CEIP LOMLOE Innovación" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Código Centro</label>
+                        <input type="text" id="centro-codigo" placeholder="38001234" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Localidad</label>
+                        <input type="text" id="centro-localidad" placeholder="Santa Cruz" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Etapa Educativa</label>
+                    <select id="centro-etapa" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <option>Infantil y Primaria</option>
+                        <option>Solo Primaria</option>
+                        <option>Secundaria / Bachillerato</option>
+                        <option>Centro Integrado (CEIP / IES)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Persona Contacto</label>
+                        <input type="text" id="centro-contacto" placeholder="Coordinador TDE" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Email Contacto</label>
+                        <input type="email" id="centro-email" placeholder="tde@colegio.es" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Color de Referencia</label>
+                    <div class="flex items-center space-x-3">
+                        <input type="color" id="centro-color" value="#0284c7" class="h-10 w-16 p-1 bg-slate-50 border border-slate-300 rounded-lg cursor-pointer">
+                        <span class="text-xs text-slate-500">Color distintivo para las fichas y calendario</span>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
+                    <button type="button" onclick="closeCentroModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-md transition">
+                        Guardar Centro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const STORAGE_KEY = 'escuela40_mentor_app_data_v2';
+        const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+        // Initial default state if localStorage is empty
+        const INITIAL_STATE = {
+            centros: [
+                { id: 1, nombre: 'CEIP LOMLOE Innovación', codigo: '38001234', localidad: 'Santa Cruz', etapa: 'Infantil y Primaria', contacto: 'María (Coord. TDE)', email: 'tde@ceiplomloe.es', color: '#0284c7' },
+                { id: 2, nombre: 'IES Pensamiento Computacional', codigo: '38005678', localidad: 'La Laguna', etapa: 'Secundaria / Bachillerato', contacto: 'Juan (Jefe Estudios)', email: 'estudios@iespc.es', color: '#10b981' },
+                { id: 3, nombre: 'CEIP Robótica Futuro', codigo: '38009999', localidad: 'Arona', etapa: 'Infantil y Primaria', contacto: 'Elena (Asesora)', email: 'tic@ceiprobotica.es', color: '#f59e0b' }
+            ],
+            visitas: [
+                {
+                    id: 'v_1',
+                    centroId: 1,
+                    fecha: new Date().toISOString().split('T')[0],
+                    horas: 2.5,
+                    docentes: 4,
+                    modalidad: 'Conectada (Scratch, MakeCode)',
+                    plan: 'Iniciación al diseño algorítmico con Scratch en 5º de Primaria.',
+                    lomloe: 'STEM3 - Pensamiento computacional y algoritmos',
+                    obs: 'Traer placas Micro:bit en la próxima sesión.'
+                },
+                {
+                    id: 'v_2',
+                    centroId: 1,
+                    fecha: new Date().toISOString().split('T')[0], // Múltiples visitas el mismo día
+                    horas: 1.5,
+                    docentes: 8,
+                    modalidad: 'Formación de Profesorado',
+                    plan: 'Taller de Claustro: Evaluación por competencias con el nuevo currículo.',
+                    lomloe: 'Competencia Digital Docente (CDD)',
+                    obs: 'Entregada guía digital PDF.'
+                },
+                {
+                    id: 'v_3',
+                    centroId: 2,
+                    fecha: new Date(Date.now() - 86400000 * 3).toISOString().split('T')[0],
+                    horas: 3,
+                    docentes: 2,
+                    modalidad: 'Robótica / Hardware (Micro:bit, Spike)',
+                    plan: 'Montaje y programación de sensores con LEGO Spike Prime.',
+                    lomloe: 'STEM2 y CDD',
+                    obs: 'Alumnado muy motivado.'
+                }
+            ],
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear()
+        };
+
+        let appState = { centros: [], visitas: [], currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear() };
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    appState = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Error parsing saved state:", e);
+                    appState = JSON.parse(JSON.stringify(INITIAL_STATE));
+                }
+            } else {
+                appState = JSON.parse(JSON.stringify(INITIAL_STATE));
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Style active nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'text-white');
+                btn.classList.add('text-slate-300');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-slate-800', 'text-white');
+                activeBtn.classList.remove('text-slate-300');
+            }
+
+            // Render specific tab contents
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'visitas') { renderCalendar(); renderMonthlyPlanning(); renderVisitasList(); }
+            if (tabId === 'centros') renderCentros();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYearLbl = document.getElementById('calendar-month-year');
+            grid.innerHTML = '';
+
+            monthYearLbl.textContent = `${MONTH_NAMES[appState.currentMonth]} ${appState.currentYear}`;
+
+            const firstDayIndex = new Date(appState.currentYear, appState.currentMonth, 1).getDay();
+            const startOffset = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
+            const totalDaysInMonth = new Date(appState.currentYear, appState.currentMonth + 1, 0).getDate();
+
+            const selectedCentroFilter = parseInt(document.getElementById('filter-visita-centro').value || '0');
+
+            // Empty padding cells for previous month
+            for (let i = 0; i < startOffset; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'min-h-[80px] bg-slate-50/50 rounded-xl border border-dashed border-slate-200';
+                grid.appendChild(emptyCell);
+            }
+
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            // Render days of the month
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                const monthStr = String(appState.currentMonth + 1).padStart(2, '0');
+                const dayStr = String(day).padStart(2, '0');
+                const dateKey = `${appState.currentYear}-${monthStr}-${dayStr}`;
+
+                const isToday = dateKey === todayStr;
+
+                let dayVisitas = appState.visitas.filter(v => v.fecha === dateKey);
+                if (selectedCentroFilter > 0) {
+                    dayVisitas = dayVisitas.filter(v => v.centroId === selectedCentroFilter);
+                }
+
+                const cell = document.createElement('div');
+                cell.className = `min-h-[90px] sm:min-h-[100px] p-1.5 sm:p-2 rounded-xl border transition cursor-pointer flex flex-col justify-between calendar-day-hover ${
+                    isToday ? 'bg-cyan-50/60 border-cyan-400 font-semibold' : 'bg-white border-slate-200/90'
+                }`;
+
+                cell.onclick = () => openVisitModalWithDate(dateKey);
+
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'flex items-center justify-between mb-1';
+                dayHeader.innerHTML = `
+                    <span class="text-xs ${isToday ? 'text-cyan-700 font-extrabold bg-cyan-200/70 px-1.5 py-0.5 rounded-md' : 'text-slate-700 font-bold'}">${day}</span>
+                    ${dayVisitas.length > 0 ? `<span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded-full">${dayVisitas.length}</span>` : ''}
+                `;
+                cell.appendChild(dayHeader);
+
+                const badgesBox = document.createElement('div');
+                badgesBox.className = 'space-y-1 overflow-hidden flex-1';
+
+                dayVisitas.slice(0, 3).forEach(vis => {
+                    const centro = appState.centros.find(c => c.id === vis.centroId) || { nombre: 'Centro General', color: '#0284c7' };
+                    const badge = document.createElement('div');
+                    badge.className = 'text-[10px] truncate font-medium text-white px-1.5 py-0.5 rounded shadow-sm flex items-center justify-between';
+                    badge.style.backgroundColor = centro.color || '#0284c7';
+                    badge.title = `${centro.nombre}: ${vis.modalidad}`;
+                    badge.innerHTML = `<span>${centro.nombre}</span>`;
+                    badgesBox.appendChild(badge);
+                });
+
+                if (dayVisitas.length > 3) {
+                    const moreLbl = document.createElement('div');
+                    moreLbl.className = 'text-[9px] font-bold text-slate-500 text-right pr-1';
+                    moreLbl.textContent = `+${dayVisitas.length - 3} más`;
+                    badgesBox.appendChild(moreLbl);
+                }
+
+                cell.appendChild(badgesBox);
+                grid.appendChild(cell);
+            }
+        }
+
+        // RENDER MONTHLY PLANNING & METRICS
+        function renderMonthlyPlanning() {
+            const container = document.getElementById('monthly-planning-container');
+            const agendaTitle = document.getElementById('monthly-agenda-title');
+            const agendaBadge = document.getElementById('monthly-agenda-badge');
+            container.innerHTML = '';
+
+            const currentMonthName = MONTH_NAMES[appState.currentMonth];
+            agendaTitle.textContent = `Cronograma Mensual - ${currentMonthName} ${appState.currentYear}`;
+
+            const selectedCentroFilter = parseInt(document.getElementById('filter-visita-centro').value || '0');
+
+            // Filter visits for current active month and year
+            let monthVisitas = appState.visitas.filter(v => {
+                const parts = v.fecha.split('-');
+                if (parts.length < 2) return false;
+                const vYear = parseInt(parts[0]);
+                const vMonth = parseInt(parts[1]) - 1;
+                return vYear === appState.currentYear && vMonth === appState.currentMonth;
+            });
+
+            if (selectedCentroFilter > 0) {
+                monthVisitas = monthVisitas.filter(v => v.centroId === selectedCentroFilter);
+            }
+
+            // Sort chronologically ascending
+            monthVisitas.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+
+            // Update Month KPIs
+            const totalVisitasMes = monthVisitas.length;
+            const totalHorasMes = monthVisitas.reduce((s, v) => s + (parseFloat(v.horas) || 0), 0);
+            const uniqueCentros = new Set(monthVisitas.map(v => v.centroId)).size;
+            const totalDocentesMes = monthVisitas.reduce((s, v) => s + (parseInt(v.docentes) || 0), 0);
+
+            document.getElementById('month-stat-visitas').textContent = totalVisitasMes;
+            document.getElementById('month-stat-horas').textContent = `${totalHorasMes}h`;
+            document.getElementById('month-stat-centros').textContent = uniqueCentros;
+            document.getElementById('month-stat-docentes').textContent = totalDocentesMes;
+
+            agendaBadge.textContent = `${totalVisitasMes} visita${totalVisitasMes !== 1 ? 's' : ''} en ${currentMonthName}`;
+
+            if (monthVisitas.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 border border-dashed border-slate-200 rounded-xl">
+                        <i class="fa-solid fa-calendar-xmark text-slate-300 text-4xl mb-2"></i>
+                        <p class="text-sm text-slate-500 font-medium">No hay mentorías planificadas para ${currentMonthName} ${appState.currentYear}.</p>
+                        <button onclick="openVisitModal()" class="mt-3 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg transition">
+                            + Añadir Primera Visita del Mes
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render Chronological Agenda Cards
+            monthVisitas.forEach(v => {
+                const centro = appState.centros.find(c => c.id === v.centroId) || { nombre: 'Centro General', color: '#0284c7', localidad: '' };
+                const dateObj = new Date(v.fecha + 'T00:00:00');
+                const dayNum = dateObj.getDate();
+                const dayOfWeek = dateObj.toLocaleDateString('es-ES', { weekday: 'short' }).toUpperCase();
+
+                const item = document.createElement('div');
+                item.className = 'bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-300 transition shadow-sm';
+                item.innerHTML = `
+                    <div class="flex items-start space-x-4">
+                        <!-- Date Badge -->
+                        <div class="w-14 h-14 bg-slate-900 text-white rounded-xl flex flex-col items-center justify-center shrink-0 shadow-sm">
+                            <span class="text-[10px] uppercase font-bold text-cyan-400 tracking-wider">${dayOfWeek}</span>
+                            <span class="text-xl font-extrabold leading-none">${dayNum}</span>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-bold text-slate-800 text-sm sm:text-base">${centro.nombre}</span>
+                                <span class="px-2 py-0.5 text-[10px] font-semibold rounded text-white" style="background-color: ${centro.color}">
+                                    ${centro.localidad || 'Sede'}
+                                </span>
+                                <span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded font-medium border border-slate-200">
+                                    ${v.modalidad}
+                                </span>
+                            </div>
+
+                            <p class="text-xs sm:text-sm font-semibold text-slate-700 leading-snug">${v.plan}</p>
+
+                            ${v.lomloe ? `
+                                <div class="text-[11px] text-purple-700 font-medium flex items-center space-x-1 pt-0.5">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                    <span>${v.lomloe}</span>
+                                </div>
+                            ` : ''}
+
+                            ${v.obs ? `
+                                <p class="text-[11px] text-slate-500 italic"><i class="fa-regular fa-note-sticky mr-1"></i>${v.obs}</p>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Metrics / Action -->
+                    <div class="flex items-center justify-between md:justify-end gap-4 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
+                        <div class="text-right text-xs space-y-0.5">
+                            <span class="font-extrabold text-slate-800 block">${v.horas}h mentoría</span>
+                            <span class="text-slate-500 text-[11px] block">${v.docentes} docente${v.docentes !== 1 ? 's' : ''}</span>
+                        </div>
+
+                        <div class="space-x-1 no-print">
+                            <button onclick="openVisitModal('${v.id}')" class="p-2 text-cyan-600 hover:bg-cyan-50 rounded-lg transition" title="Editar Visita">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteVisit('${v.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" title="Eliminar Visita">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function printMonthlyPlan() {
+            document.getElementById('print-month-title').textContent = `Planificación y Agenda de Mentoría - ${MONTH_NAMES[appState.currentMonth]} ${appState.currentYear}`;
+            document.getElementById('print-date').textContent = new Date().toLocaleDateString('es-ES');
+            window.print();
+        }
+
+        function changeMonth(delta) {
+            appState.currentMonth += delta;
+            if (appState.currentMonth < 0) {
+                appState.currentMonth = 11;
+                appState.currentYear--;
+            } else if (appState.currentMonth > 11) {
+                appState.currentMonth = 0;
+                appState.currentYear++;
+            }
+            saveState();
+            renderCalendar();
+            renderMonthlyPlanning();
+        }
+
+        function goToday() {
+            appState.currentMonth = new Date().getMonth();
+            appState.currentYear = new Date().getFullYear();
+            saveState();
+            renderCalendar();
+            renderMonthlyPlanning();
+        }
+
+        function openVisitModal(visitaId = null) {
+            document.getElementById('form-visita').reset();
+            document.getElementById('visita-id').value = '';
+            document.getElementById('visita-fecha').value = new Date().toISOString().split('T')[0];
+            
+            populateCentroSelectOptions('visita-centro-id');
+
+            if (visitaId) {
+                const vis = appState.visitas.find(v => v.id === visitaId);
+                if (vis) {
+                    document.getElementById('modal-visita-title').innerText = 'Editar Visita de Asesoramiento';
+                    document.getElementById('visita-id').value = vis.id;
+                    document.getElementById('visita-fecha').value = vis.fecha;
+                    document.getElementById('visita-centro-id').value = vis.centroId;
+                    document.getElementById('visita-horas').value = vis.horas || 2;
+                    document.getElementById('visita-docentes').value = vis.docentes || 1;
+                    document.getElementById('visita-modalidad').value = vis.modalidad;
+                    document.getElementById('visita-plan').value = vis.plan;
+                    document.getElementById('visita-lomloe').value = vis.lomloe || '';
+                    document.getElementById('visita-obs').value = vis.obs || '';
+                }
+            } else {
+                document.getElementById('modal-visita-title').innerText = 'Registrar Nueva Visita';
+            }
+
+            document.getElementById('modal-visita').classList.remove('hidden');
+        }
+
+        function openVisitModalWithDate(dateStr) {
+            openVisitModal();
+            document.getElementById('visita-fecha').value = dateStr;
+        }
+
+        function closeVisitModal() {
+            document.getElementById('modal-visita').classList.add('hidden');
+        }
+
+        function saveVisit(e) {
+            e.preventDefault();
+            const id = document.getElementById('visita-id').value;
+            const centroId = parseInt(document.getElementById('visita-centro-id').value);
+            const fecha = document.getElementById('visita-fecha').value;
+            const horas = parseFloat(document.getElementById('visita-horas').value) || 2;
+            const docentes = parseInt(document.getElementById('visita-docentes').value) || 1;
+            const modalidad = document.getElementById('visita-modalidad').value;
+            const plan = document.getElementById('visita-plan').value;
+            const lomloe = document.getElementById('visita-lomloe').value;
+            const obs = document.getElementById('visita-obs').value;
+
+            if (id) {
+                const idx = appState.visitas.findIndex(v => v.id === id);
+                if (idx !== -1) {
+                    appState.visitas[idx] = { id, centroId, fecha, horas, docentes, modalidad, plan, lomloe, obs };
+                }
+            } else {
+                const newVisit = {
+                    id: 'v_' + Date.now(),
+                    centroId,
+                    fecha,
+                    horas,
+                    docentes,
+                    modalidad,
+                    plan,
+                    lomloe,
+                    obs
+                };
+                appState.visitas.push(newVisit);
+            }
+
+            saveState();
+            closeVisitModal();
+            renderCalendar();
+            renderMonthlyPlanning();
+            renderVisitasList();
+            renderDashboard();
+        }
+
+        function deleteVisit(id) {
+            appState.visitas = appState.visitas.filter(v => v.id !== id);
+            saveState();
+            renderCalendar();
+            renderMonthlyPlanning();
+            renderVisitasList();
+            renderDashboard();
+        }
+
+        function renderVisitasList() {
+            const tbody = document.getElementById('visitas-table-body');
+            tbody.innerHTML = '';
+
+            const selectedCentroFilter = parseInt(document.getElementById('filter-visita-centro').value || '0');
+            const searchText = (document.getElementById('search-visita-input').value || '').toLowerCase();
+
+            let filtered = appState.visitas.slice().sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+
+            if (selectedCentroFilter > 0) {
+                filtered = filtered.filter(v => v.centroId === selectedCentroFilter);
+            }
+
+            if (searchText) {
+                filtered = filtered.filter(v => {
+                    const centro = appState.centros.find(c => c.id === v.centroId);
+                    const centroNom = centro ? centro.nombre.toLowerCase() : '';
+                    return centroNom.includes(searchText) || 
+                           v.modalidad.toLowerCase().includes(searchText) || 
+                           v.plan.toLowerCase().includes(searchText);
+                });
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 italic">No hay visitas registradas que coincidan con los filtros.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(v => {
+                const centro = appState.centros.find(c => c.id === v.centroId) || { nombre: 'Desconocido', color: '#64748b' };
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition';
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold whitespace-nowrap text-slate-700">${v.fecha}</td>
+                    <td class="p-3 font-bold" style="color: ${centro.color}">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style="background-color: ${centro.color}"></span>
+                        ${centro.nombre}
+                    </td>
+                    <td class="p-3">
+                        <span class="inline-block bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs font-medium">${v.modalidad}</span>
+                    </td>
+                    <td class="p-3 whitespace-nowrap">${v.horas}h / ${v.docentes} doc.</td>
+                    <td class="p-3 max-w-xs truncate" title="${v.plan}">${v.plan}</td>
+                    <td class="p-3 text-right space-x-1 whitespace-nowrap">
+                        <button onclick="openVisitModal('${v.id}')" class="p-1.5 text-cyan-600 hover:bg-cyan-50 rounded transition" title="Editar">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteVisit('${v.id}')" class="p-1.5 text-red-500 hover:bg-red-50 rounded transition" title="Eliminar">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderCentros() {
+            const grid = document.getElementById('centros-grid');
+            grid.innerHTML = '';
+
+            if (appState.centros.length === 0) {
+                grid.innerHTML = `<div class="col-span-full p-8 bg-white rounded-2xl border text-center text-slate-400">No tienes ningún centro registrado actualmente. Haz clic en "Añadir Nuevo Centro".</div>`;
+                return;
+            }
+
+            appState.centros.forEach(c => {
+                const countVisitas = appState.visitas.filter(v => v.centroId === c.id).length;
+                const totalHoras = appState.visitas.filter(v => v.centroId === c.id).reduce((sum, v) => sum + (v.horas || 0), 0);
+
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition';
+                card.innerHTML = `
+                    <div>
+                        <div class="h-3 w-full" style="background-color: ${c.color}"></div>
+                        <div class="p-5 space-y-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-base leading-snug">${c.nombre}</h3>
+                                    <p class="text-xs text-slate-400 font-medium">Cód: ${c.codigo || 'N/A'} • ${c.localidad || 'Sin localidad'}</p>
+                                </div>
+                                <span class="px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-white" style="background-color: ${c.color}">
+                                    ${c.etapa || 'General'}
+                                </span>
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-100 text-xs space-y-1.5 text-slate-600">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-user-tie text-slate-400 w-4 text-center"></i>
+                                    <span>${c.contacto || 'Sin contacto asignado'}</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fa-solid fa-envelope text-slate-400 w-4 text-center"></i>
+                                    <span class="truncate">${c.email || 'Sin correo registrado'}</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 pt-2 text-center text-xs">
+                                <div class="bg-slate-50 p-2 rounded-xl">
+                                    <span class="block font-bold text-slate-800">${countVisitas}</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">Visitas</span>
+                                </div>
+                                <div class="bg-slate-50 p-2 rounded-xl">
+                                    <span class="block font-bold text-slate-800">${totalHoras}h</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">Mentoría</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50/80 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+                        <button onclick="openVisitModalWithCentro(${c.id})" class="text-xs font-semibold text-emerald-600 hover:underline flex items-center space-x-1">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Añadir Visita</span>
+                        </button>
+
+                        <div class="space-x-1">
+                            <button onclick="openCentroModal(${c.id})" class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded transition" title="Editar Centro">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="confirmDeleteCentro(${c.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="Eliminar Centro">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openCentroModal(centroId = null) {
+            document.getElementById('form-centro').reset();
+            document.getElementById('centro-id').value = '';
+
+            if (centroId) {
+                const c = appState.centros.find(item => item.id === centroId);
+                if (c) {
+                    document.getElementById('modal-centro-title').innerText = 'Editar Centro Educativo';
+                    document.getElementById('centro-id').value = c.id;
+                    document.getElementById('centro-nombre').value = c.nombre;
+                    document.getElementById('centro-codigo').value = c.codigo || '';
+                    document.getElementById('centro-localidad').value = c.localidad || '';
+                    document.getElementById('centro-etapa').value = c.etapa || 'Infantil y Primaria';
+                    document.getElementById('centro-contacto').value = c.contacto || '';
+                    document.getElementById('centro-email').value = c.email || '';
+                    document.getElementById('centro-color').value = c.color || '#0284c7';
+                }
+            } else {
+                document.getElementById('modal-centro-title').innerText = 'Añadir Nuevo Centro Educativo';
+            }
+
+            document.getElementById('modal-centro').classList.remove('hidden');
+        }
+
+        function closeCentroModal() {
+            document.getElementById('modal-centro').classList.add('hidden');
+        }
+
+        function saveCentro(e) {
+            e.preventDefault();
+            const id = document.getElementById('centro-id').value;
+            const nombre = document.getElementById('centro-nombre').value.trim();
+            const codigo = document.getElementById('centro-codigo').value.trim();
+            const localidad = document.getElementById('centro-localidad').value.trim();
+            const etapa = document.getElementById('centro-etapa').value;
+            const contacto = document.getElementById('centro-contacto').value.trim();
+            const email = document.getElementById('centro-email').value.trim();
+            const color = document.getElementById('centro-color').value;
+
+            if (id) {
+                const idx = appState.centros.findIndex(c => c.id === parseInt(id));
+                if (idx !== -1) {
+                    appState.centros[idx] = { id: parseInt(id), nombre, codigo, localidad, etapa, contacto, email, color };
+                }
+            } else {
+                const newId = appState.centros.length > 0 ? Math.max(...appState.centros.map(c => c.id)) + 1 : 1;
+                appState.centros.push({ id: newId, nombre, codigo, localidad, etapa, contacto, email, color });
+            }
+
+            saveState();
+            closeCentroModal();
+            renderCentros();
+            populateCentroSelectOptions('filter-visita-centro');
+            renderDashboard();
+        }
+
+        function openVisitModalWithCentro(centroId) {
+            openVisitModal();
+            document.getElementById('visita-centro-id').value = centroId;
+        }
+
+        function populateCentroSelectOptions(selectElementId) {
+            const select = document.getElementById(selectElementId);
+            if (!select) return;
+
+            const currentValue = select.value;
+            select.innerHTML = '';
+
+            if (selectElementId === 'filter-visita-centro') {
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '0';
+                defaultOpt.textContent = 'Todos los centros';
+                select.appendChild(defaultOpt);
+            }
+
+            appState.centros.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nombre;
+                select.appendChild(opt);
+            });
+
+            if (currentValue && appState.centros.some(c => c.id === parseInt(currentValue))) {
+                select.value = currentValue;
+            }
+        }
+
+        function renderDashboard() {
+            document.getElementById('stat-total-visitas').innerText = appState.visitas.length;
+            document.getElementById('stat-total-centros').innerText = appState.centros.length;
+
+            const totalDocentes = appState.visitas.reduce((sum, v) => sum + (v.docentes || 0), 0);
+            document.getElementById('stat-total-docentes').innerText = totalDocentes;
+
+            const totalHoras = appState.visitas.reduce((sum, v) => sum + (v.horas || 0), 0);
+            document.getElementById('stat-total-horas').innerText = `${totalHoras}h`;
+
+            const recentContainer = document.getElementById('dash-recent-visitas');
+            recentContainer.innerHTML = '';
+
+            const recentVisitas = appState.visitas.slice().sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).slice(0, 4);
+
+            if (recentVisitas.length === 0) {
+                recentContainer.innerHTML = `<p class="text-xs text-slate-400 italic">No hay visitas registradas aún.</p>`;
+            } else {
+                recentVisitas.forEach(v => {
+                    const centro = appState.centros.find(c => c.id === v.centroId) || { nombre: 'General', color: '#0284c7' };
+                    const div = document.createElement('div');
+                    div.className = 'p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs hover:bg-slate-50 transition';
+                    div.innerHTML = `
+                        <div class="flex items-center space-x-3 truncate">
+                            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${centro.color}"></span>
+                            <div class="truncate">
+                                <h4 class="font-bold text-slate-800 truncate">${centro.nombre}</h4>
+                                <p class="text-[11px] text-slate-500 truncate">${v.plan}</p>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0 ml-2">
+                            <span class="font-bold text-slate-700 block">${v.fecha}</span>
+                            <span class="text-[10px] text-cyan-600 font-semibold">${v.horas}h mentoría</span>
+                        </div>
+                    `;
+                    recentContainer.appendChild(div);
+                });
+            }
+
+            const modContainer = document.getElementById('dash-modalities-list');
+            modContainer.innerHTML = '';
+
+            const modalitiesCounts = {};
+            appState.visitas.forEach(v => {
+                modalitiesCounts[v.modalidad] = (modalitiesCounts[v.modalidad] || 0) + 1;
+            });
+
+            if (Object.keys(modalitiesCounts).length === 0) {
+                modContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Aún no hay modalidades registradas.</p>`;
+            } else {
+                const total = appState.visitas.length;
+                Object.entries(modalitiesCounts).forEach(([mod, count]) => {
+                    const pct = Math.round((count / total) * 100);
+                    const div = document.createElement('div');
+                    div.className = 'space-y-1';
+                    div.innerHTML = `
+                        <div class="flex justify-between text-xs font-semibold text-slate-700">
+                            <span class="truncate max-w-[180px]">${mod}</span>
+                            <span>${count} (${pct}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-cyan-600 h-1.5 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    `;
+                    modContainer.appendChild(div);
+                });
+            }
+        }
+
+        function generateRetoTemplate() {
+            const titulo = document.getElementById('reto-titulo').value || 'Reto de Aula Código Escuela 4.0';
+            const etapa = document.getElementById('reto-etapa').value;
+            const materia = document.getElementById('reto-materia').value;
+            const hardware = document.getElementById('reto-hardware').value;
+            const objetivo = document.getElementById('reto-objetivo').value || 'Desarrollar el pensamiento computacional mediante algoritmos simples.';
+
+            const card = document.getElementById('reto-preview-card');
+            card.innerHTML = `
+                <div class="border-b border-slate-100 pb-3 space-y-1">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Ficha Didáctica Código Escuela 4.0</span>
+                    <h4 class="font-extrabold text-slate-800 text-base">${titulo}</h4>
+                    <p class="text-xs text-slate-500">Etapa: <strong>${etapa}</strong> | Materia: <strong>${materia}</strong> | Recurso: <strong>${hardware}</strong></p>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <h5 class="font-bold text-slate-700 text-xs">🎯 Objetivos & Competencia LOMLOE</h5>
+                        <p class="text-slate-600 mt-0.5">${objetivo}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+                        <div class="bg-amber-50/60 p-3 rounded-xl border border-amber-100 space-y-1">
+                            <span class="font-bold text-amber-800 text-xs block"><i class="fa-solid fa-puzzle-piece mr-1"></i> FASE 1: Desconectada</span>
+                            <p class="text-[11px] text-amber-900 leading-tight">Actividad de lógica y secuencias mediante tarjetas físicas o cuadrículas en el suelo para predecir recorridos.</p>
+                        </div>
+                        <div class="bg-cyan-50/60 p-3 rounded-xl border border-cyan-100 space-y-1">
+                            <span class="font-bold text-cyan-800 text-xs block"><i class="fa-solid fa-laptop-code mr-1"></i> FASE 2: Conectada</span>
+                            <p class="text-[11px] text-cyan-900 leading-tight">Traducción de los pasos del algoritmo en el entorno informático (Scratch / MakeCode) comprobando errores de código.</p>
+                        </div>
+                        <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-100 space-y-1">
+                            <span class="font-bold text-emerald-800 text-xs block"><i class="fa-solid fa-robot mr-1"></i> FASE 3: Robótica</span>
+                            <p class="text-[11px] text-emerald-900 leading-tight">Transferencia del programa al robot físico (<strong>${hardware}</strong>) para la interacción directa con el entorno real.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function copyRetoToClipboard() {
+            const card = document.getElementById('reto-preview-card');
+            const textToCopy = card.innerText;
+            
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = textToCopy;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            alert("¡Ficha didáctica copiada al portapapeles!");
+        }
+
+        function exportDataJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `codigo_escuela_40_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importDataJSON(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.centros && parsed.visitas) {
+                        appState = parsed;
+                        saveState();
+                        alert("¡Datos importados correctamente!");
+                        location.reload();
+                    } else {
+                        alert("El archivo JSON no tiene un formato válido.");
+                    }
+                } catch (err) {
+                    alert("Error al leer el archivo JSON.");
+                }
+            };
+            fileReader.readAsText(event.target.files[0]);
+        }
+
+        function restoreDemoData() {
+            if (confirm("¿Seguro que deseas restablecer los datos de demostración? Se sobreescribirán tus registros locales.")) {
+                appState = JSON.parse(JSON.stringify(INITIAL_STATE));
+                saveState();
+                location.reload();
+            }
+        }
+
+        // Initialize App on DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            populateCentroSelectOptions('filter-visita-centro');
+            renderDashboard();
+            renderCalendar();
+            renderMonthlyPlanning();
+            renderVisitasList();
+            renderCentros();
+        });
+    </script>
+</body>
+</html>
